@@ -8,7 +8,7 @@ import java.awt.Toolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.time.Clock;
+import java.net.URL;
 
 public class UI {
 	static String ip,port;
@@ -22,9 +22,6 @@ public class UI {
 	}
 	
 	public static void show(){
-		
-		TrayIcon icon = new TrayIcon(Toolkit.getDefaultToolkit().getImage(Clock.class.getResource("/javax/swing/plaf/basic/icons/JavaCup16.png")));
-		
 		SystemTray tray=SystemTray.getSystemTray();
 		PopupMenu pop=new PopupMenu();
 		MenuItem mip=new MenuItem(ip);
@@ -33,7 +30,9 @@ public class UI {
 		pop.add(mip);
 		pop.add(mport);
 		pop.add(exit);
-		TrayIcon trayIcon=new TrayIcon(icon.getImage(), "server", pop);
+		URL fileURL=UI.class.getResource("/icon.png");
+		TrayIcon trayIcon=new TrayIcon(Toolkit.getDefaultToolkit().getImage(fileURL), "server", pop);
+		trayIcon.setImageAutoSize(true);
 		try {
 			tray.add(trayIcon);
 		} catch (AWTException e) {
