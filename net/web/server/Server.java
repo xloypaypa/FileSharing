@@ -38,7 +38,6 @@ public class Server {
 		while (!shutDown){
 			try {
 				Socket socket=server.accept();
-				System.out.println("accept");
 				
 				InputStream in=socket.getInputStream();
 				String ans=new String();

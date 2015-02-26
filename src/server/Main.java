@@ -6,10 +6,10 @@ public class Main {
 	public static void main(String[] args){
 		Server server;
 		Server.fileSize=1000000;
-		System.out.println("server open");
 		server=new Server(8899);
-		System.out.println("port: "+server.getPort());
+		UI.setIP("127.0.0.1");
+		UI.setPort("8899");
+		UI.show();
 		server.listen();
-		System.out.println("end");
 	}
 }

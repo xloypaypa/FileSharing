@@ -32,6 +32,7 @@ public class Client {
 		out.flush();
 		
 		InputStream in=client.getInputStream();
+		Node ret=new Node();
 		String ans=new String();
 		byte[] now=new byte[64];
 		while (true){
@@ -40,11 +41,11 @@ public class Client {
 			ans+=new String(now,0,len);
 			if (ans.endsWith("$")) break;
 		}
-		node.solve(ans);
+		ret.solve(ans);
 		
 		client.close();
 		
-		return node;
+		return ret;
 	}
 	
 	public void startFileClient(Node node){
@@ -52,6 +53,13 @@ public class Client {
 		fc.ip=ip;
 		fc.need=new Node(node);
 		fc.start();
+	}
+	
+	public void runFileClient(Node node){
+		fc=new FileClient();
+		fc.ip=ip;
+		fc.need=new Node(node);
+		fc.run();
 	}
 	
 	public boolean isAlive(){
