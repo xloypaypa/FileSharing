@@ -8,6 +8,7 @@ import java.net.Socket;
 import java.util.Vector;
 
 import web.Node;
+import web.client.Client;
 import database.HHD;
 import encryptionAlgorithm.AES;
 
@@ -62,8 +63,7 @@ public class FileServer extends Thread {
 					file=AES.decodeAsByte(file, need.getExtraMessage("password"));
 				}
 				
-				if (need.getPart()==0) HHD.cleanFile(need.getSavePath());
-				HHD.addByte(need.getSavePath(), file);
+				HHD.writeByte(need.getSavePath(), file, need.getPart()*Client.fileSize, file.length);
 				in.close();
 			}
 			socket.close();

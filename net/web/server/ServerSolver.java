@@ -57,6 +57,13 @@ public class ServerSolver extends Thread {
 			}else{
 				node.setCommand("not exist");
 			}
+		}else if (node.getCommand().equals("clean file")){
+			if (HHD.fileExiste(node.getPath())||HHD.folderExiste(node.getPath())){
+				HHD.cleanFile(node.getPath());
+				node.setCommand("ok");
+			}else{
+				node.setCommand("not exist");
+			}
 		}
 		
 		try {

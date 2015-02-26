@@ -5,6 +5,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import web.Node;
 import database.HHD;
@@ -14,6 +16,12 @@ public class FileClient extends Thread {
 	String ip;
 	Node need;
 	Socket client;
+	static ExecutorService pool = Executors.newFixedThreadPool(2);
+	
+	public static void setMaxWriteThread(int num){
+		pool = Executors.newFixedThreadPool(num);
+	}
+	
 	public void setNeed(Node node){
 		this.need=node;
 	}
@@ -47,15 +55,16 @@ public class FileClient extends Thread {
 						for (int i=0;i<len;i++) ans.add(now[i]);
 					}
 					
-					byte[] file=new byte[ans.size()];
+					final byte[] file=new byte[ans.size()];
 					for (int i=0;i<file.length;i++) file[i]=ans.get(i);
 					
 					if (need.extraExist("password")){
-						file=AES.decodeAsByte(file, need.getExtraMessage("password"));
+						final byte[] ret=AES.decodeAsByte(file, need.getExtraMessage("password"));
+						writeFile(ret);
+					}else{
+						writeFile(file);
 					}
 					
-					if (need.getPart()==0) HHD.cleanFile(need.getSavePath());
-					HHD.addByte(need.getSavePath(), file);
 					in.close();
 				}
 				client.close();
@@ -66,5 +75,14 @@ public class FileClient extends Thread {
 				if (t==0) break;
 			}
 		}
+	}
+
+	private void writeFile(final byte[] file) {
+		pool.execute(new Thread(){
+			@Override
+			public void run(){
+				HHD.writeByte(need.getSavePath(), file, need.getPart()*Client.fileSize, file.length);
+			}
+		});
 	}
 }

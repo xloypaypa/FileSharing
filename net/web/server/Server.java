@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import web.Node;
 
@@ -12,6 +14,7 @@ public class Server {
 	ServerSocket server;
 	ServerSolver solver;
 	int port;
+	static ExecutorService pool = Executors.newFixedThreadPool(10);
 	public Server(int port){
 		this.port=port;
 		buildServer();
@@ -61,11 +64,15 @@ public class Server {
 				solver=new ServerSolver();
 				solver.setSocket(socket);
 				solver.setNode(node);
-				solver.start();
+				pool.execute(solver);
 				
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	public static void setMaxThread(int num){
+		pool = Executors.newFixedThreadPool(num);
 	}
 }

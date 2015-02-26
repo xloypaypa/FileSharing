@@ -1,6 +1,7 @@
 package database;
 
 import java.io.*;
+import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
 
@@ -107,31 +108,7 @@ public class HHD {
 	
 	
 	public static byte[] readByte(String path){
-		
-		if (!HHD.fileExiste(path)){
-			String d=new String(),f=new String();
-			int len=path.length(),pos=0;
-			for (pos=len-1;pos>=0;pos--){
-				if (path.toCharArray()[pos]=='/') break;
-			}
-			
-			for (int i=0;i<=pos;i++) d+=path.toCharArray()[i];
-			for (int i=pos+1;i<len;i++) f+=path.toCharArray()[i];
-			
-			HHD.createFile(d, f);
-		}
-		
-		File file=new File(path);
-		FileInputStream fis;
-		try {
-			fis = new FileInputStream(file);
-			byte[] ans=new byte[(int) file.length()];
-			fis.read(ans);
-			fis.close();
-			return ans;
-		} catch (IOException e) {
-			return null;
-		}
+		return readByte(path, 0, (int) HHD.getFileLength(path));
 	}
 	
 	public static byte[] readByte(String path, long from, int length){
@@ -151,12 +128,10 @@ public class HHD {
 		
 		File file=new File(path);
 		try {
-			RandomAccessFile  raf=new RandomAccessFile(file, "r");
-			raf.seek(from);
+			RandomAccessFile  raf=new RandomAccessFile(file, "rw");
+			MappedByteBuffer buffer=raf.getChannel().map(FileChannel.MapMode.READ_WRITE, from, length);
 			byte[] ans=new byte[length];
-			for (int i=0;i<length;i++){
-				ans[i]=raf.readByte();
-			}
+			for (int i=0;i<length;i++) ans[i]=buffer.get(i);
 			raf.close();
 			return ans;
 		} catch (IOException e) {
@@ -165,14 +140,32 @@ public class HHD {
 	}
 	
 	public static void writeByte(String path, byte[] message){
+		writeByte(path,message,0,message.length);
+	}
+	
+	public static void writeByte(String path,byte[] message, long from, int length){
+		if (!HHD.fileExiste(path)){
+			String d=new String(),f=new String();
+			int len=path.length(),pos=0;
+			for (pos=len-1;pos>=0;pos--){
+				if (path.toCharArray()[pos]=='/') break;
+			}
+			
+			for (int i=0;i<=pos;i++) d+=path.toCharArray()[i];
+			for (int i=pos+1;i<len;i++) f+=path.toCharArray()[i];
+			
+			HHD.createFile(d, f);
+		}
+		
 		File file=new File(path);
-		FileOutputStream fos;
 		try {
-			fos=new FileOutputStream(file);
-			fos.write(message);
-			fos.close();
+			RandomAccessFile raf=new RandomAccessFile(file, "rw");
+			MappedByteBuffer buffer=raf.getChannel().map(FileChannel.MapMode.READ_WRITE, from, length);
+			for (int i=0;i<length;i++){
+				buffer.put(message[i]);
+			}
+			raf.close();
 		} catch (IOException e) {
-			e.printStackTrace();
 		}
 	}
 	

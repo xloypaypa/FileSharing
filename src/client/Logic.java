@@ -115,6 +115,12 @@ public class Logic extends Thread {
 		Node node,ret;
 		node=new Node(); ret=new Node();
 		
+		node.setCommand("clean file");
+		node.setPath(savePath);
+		
+		client.connect();
+		client.send(node);
+		
 		node.setCommand("upload");
 		node.setLength(HHD.getFileLength(path));
 		node.setPath(path);
@@ -128,7 +134,7 @@ public class Logic extends Thread {
 			ret=client.send(node);
 			
 			if (ret.getCommand().equals("ok")){
-				client.runFileClient(node);
+				client.startFileClient(node);
 			}else{
 				i--;
 			}
@@ -148,10 +154,13 @@ public class Logic extends Thread {
 		client.connect();
 		ret=client.send(node);
 		
+		HHD.cleanFile(node.getSavePath());
+		
 		long part=Client.getPart(ret.getLength());
 		System.out.println("part: "+part);
 		System.out.println(part);
 		for (long i=0;i<=part;i++){
+			
 			node.setCommand("download");
 			node.setLength(ret.getLength());
 			node.setPath(path);
@@ -163,8 +172,7 @@ public class Logic extends Thread {
 			ret=client.send(node);
 			
 			if (ret.getCommand().equals("ok")){
-				System.out.println("start "+i);
-				client.runFileClient(node);
+				client.startFileClient(node);
 			}else{
 				i--;
 			}
