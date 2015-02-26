@@ -1,5 +1,8 @@
 package server;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
 import web.server.Server;
 
 public class Main {
@@ -7,8 +10,13 @@ public class Main {
 		Server server;
 		Server.fileSize=1000000;
 		server=new Server(8899);
-		UI.setIP("127.0.0.1");
-		UI.setPort("8899");
+		try {
+			InetAddress addr = InetAddress.getLocalHost();
+			UI.setIP(addr.getHostAddress());
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+		UI.setPort(server.getPort()+"");
 		UI.show();
 		server.listen();
 	}
