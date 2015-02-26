@@ -69,10 +69,6 @@ public class Client {
 		pool = Executors.newFixedThreadPool(num);
 	}
 	
-	public boolean isAlive(){
-		return fc.isAlive();
-	}
-	
 	public static long getPart(long length){
 		long ans=0;
 		ans=length/fileSize;

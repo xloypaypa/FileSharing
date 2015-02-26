@@ -1,10 +1,13 @@
 package database;
 
 import java.io.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.nio.MappedByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.*;
 
+import sun.nio.ch.FileChannelImpl;
 import encryptionAlgorithm.AES;
 
 public class HHD {
@@ -129,12 +132,19 @@ public class HHD {
 		File file=new File(path);
 		try {
 			RandomAccessFile  raf=new RandomAccessFile(file, "rw");
-			MappedByteBuffer buffer=raf.getChannel().map(FileChannel.MapMode.READ_WRITE, from, length);
+			FileChannel channel=raf.getChannel();
+			channel.force(true);
+			MappedByteBuffer buffer=channel.map(FileChannel.MapMode.READ_WRITE, from, length);
 			byte[] ans=new byte[length];
 			for (int i=0;i<length;i++) ans[i]=buffer.get(i);
+			
+			releaseBuffer(buffer);
+			
+			channel.close();
 			raf.close();
 			return ans;
 		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 	}
@@ -160,12 +170,28 @@ public class HHD {
 		File file=new File(path);
 		try {
 			RandomAccessFile raf=new RandomAccessFile(file, "rw");
-			MappedByteBuffer buffer=raf.getChannel().map(FileChannel.MapMode.READ_WRITE, from, length);
+			FileChannel channel=raf.getChannel();
+			channel.force(true);
+			MappedByteBuffer buffer=channel.map(FileChannel.MapMode.READ_WRITE, from, length);
 			for (int i=0;i<length;i++){
 				buffer.put(message[i]);
 			}
+			
+			releaseBuffer(buffer);
+			
+			channel.close();
 			raf.close();
 		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	private static void releaseBuffer(MappedByteBuffer buffer) {
+		try {
+			Method m = FileChannelImpl.class.getDeclaredMethod("unmap", MappedByteBuffer.class);
+			m.setAccessible(true);
+			m.invoke(FileChannelImpl.class, buffer);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
+			e1.printStackTrace();
 		}
 	}
 	
