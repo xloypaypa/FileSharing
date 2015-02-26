@@ -54,6 +54,7 @@ public class Server {
 				if (node.getCommand().equals("shutDown")){
 					socket.close();
 					server.close();
+					System.exit(0);
 					break;
 				}
 				
