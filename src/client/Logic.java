@@ -53,7 +53,29 @@ public class Logic extends Thread {
 				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
 				return ;
 			}
+		}else if (command.equals("delete")){
+			try{
+				delete();
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
+				return ;
+			}
 		}
+	}
+	
+	private void delete() throws UnknownHostException, IOException {
+		Client client;
+		client=new Client(ip, port);
+		
+		Node node;
+		node=new Node();
+		
+		node.setCommand("delete");
+		node.setPath(path);
+		node.setPort(getFreePort());
+		node.setSavePath(savePath);
+		client.connect();
+		client.send(node);
 	}
 	
 	private void shutDown() throws UnknownHostException, IOException {

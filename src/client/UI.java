@@ -19,12 +19,12 @@ public class UI {
 	
 	public UI(){
 		window=new JFrame("Client");
-		window.setBounds(200, 100, 250, 500);
+		window.setBounds(200, 100, 250, 550);
 		window.setLayout(null);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		show=new JPanel();
-		show.setBounds(0, 0, 250, 500);
+		show.setBounds(0, 0, 250, 550);
 		show.setLayout(null);
 		
 		addItem();
@@ -60,7 +60,7 @@ public class UI {
 		show.add(savePath.getPanel());
 		
 		lbs=new LineButtons();
-		lbs.setBounds(10, 210, width, 220);
+		lbs.setBounds(10, 210, width, 300);
 		lbs.addButton("download", 40, new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -124,6 +124,29 @@ public class UI {
 				
 				Logic logic=new Logic();
 				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "open");
+				logic.start();
+			}
+		});
+		
+		lbs.addBreak();
+		
+		lbs.addButton("delete", 40, new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent arg0) {
+				if (!checkIP(ip.getWord())){
+					JOptionPane.showMessageDialog(window, "please input ip right", "error",JOptionPane.ERROR_MESSAGE);
+					return ;
+				}
+				int pt;
+				try{
+					pt=Integer.valueOf(port.getWord());
+				}catch (NumberFormatException e){
+					JOptionPane.showMessageDialog(window, "please input port right", "error",JOptionPane.ERROR_MESSAGE);
+					return ;
+				}
+				
+				Logic logic=new Logic();
+				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "delete");
 				logic.start();
 			}
 		});
