@@ -124,12 +124,15 @@ public class Logic extends Thread {
 		node.setCommand("upload");
 		node.setLength(HHD.getFileLength(path));
 		node.setPath(path);
-		node.setPort(getFreePort());
 		node.setSavePath(savePath);
 		
 		long part=Client.getPart(node.getLength());
 		for (long i=0;i<=part;i++){
 			node.setPart(i);
+			node.setPort(getFreePort());
+			
+			while (Client.getActiveCount()==Client.getMaxThread());
+			
 			client.connect();
 			ret=client.send(node);
 			
@@ -139,6 +142,9 @@ public class Logic extends Thread {
 				i--;
 			}
 		}
+		
+		while (Client.getActiveCount()!=0);
+		JOptionPane.showMessageDialog(null, "upload ok", "message",JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void download() throws UnknownHostException, IOException {
@@ -168,6 +174,8 @@ public class Logic extends Thread {
 			node.setSavePath(savePath);
 			node.setPort(getFreePort());
 			
+			while (Client.getActiveCount()==Client.getMaxThread());
+			
 			client.connect();
 			ret=client.send(node);
 			
@@ -177,6 +185,9 @@ public class Logic extends Thread {
 				i--;
 			}
 		}
+		
+		while (Client.getActiveCount()!=0);
+		JOptionPane.showMessageDialog(null, "download ok", "message",JOptionPane.INFORMATION_MESSAGE);
 	}
 	
 	private int getFreePort(){

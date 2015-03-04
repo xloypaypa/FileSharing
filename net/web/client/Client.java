@@ -7,6 +7,7 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 import web.Node;
 
@@ -17,7 +18,8 @@ public class Client {
 	String ip;
 	int port;
 	FileClient fc;
-	static ExecutorService pool = Executors.newFixedThreadPool(2);
+	static ExecutorService pool = Executors.newFixedThreadPool(4);
+	static int maxThread=4;
 	
 	public Client(String ip, int port){
 		this.ip=ip;
@@ -66,6 +68,7 @@ public class Client {
 	}
 	
 	public static void setMaxThread(int num){
+		maxThread=num;
 		pool = Executors.newFixedThreadPool(num);
 	}
 	
@@ -75,5 +78,13 @@ public class Client {
 		if (length%fileSize==0) ans--;
 		if (ans==-1) ans=0;
 		return ans;
+	}
+	
+	public static int getMaxThread(){
+		return maxThread;
+	}
+	
+	public static int getActiveCount(){
+		return ((ThreadPoolExecutor)pool).getActiveCount();
 	}
 }
