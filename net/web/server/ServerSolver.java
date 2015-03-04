@@ -9,12 +9,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import database.HHD;
+import fileTool.FileCounter;
 import web.Node;
 
 public class ServerSolver extends Thread {
 	Node node;
 	Socket socket;
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
+	
+	static FileCounter fc=new FileCounter();
 	
 	public void setNode(Node node){
 		this.node=new Node(node);
@@ -66,6 +69,15 @@ public class ServerSolver extends Thread {
 				node.setCommand("ok");
 			}else{
 				node.setCommand("not exist");
+			}
+		}else if (node.getCommand().equals("update file lists")){
+			fc.start();
+			node.setCommand("ok");
+		}else if (node.getCommand().equals("update end")){
+			if (fc.isAlive()){
+				node.setCommand("no");
+			}else{
+				node.setCommand("yes");
 			}
 		}
 		

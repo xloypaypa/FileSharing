@@ -60,7 +60,56 @@ public class Logic extends Thread {
 				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
 				return ;
 			}
+		}else if (command.equals("update file lists")){
+			try{
+				update();
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
+				return ;
+			}
+		}else if (command.equals("update end")){
+			try{
+				updateOK();
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
+				return ;
+			}
 		}
+	}
+	
+	private void updateOK() throws UnknownHostException, IOException {
+		Client client;
+		client=new Client(ip, port);
+		
+		Node node,ret;
+		node=new Node();
+		
+		node.setCommand("update end");
+		node.setPath(path);
+		node.setPort(getFreePort());
+		node.setSavePath(savePath);
+		client.connect();
+		ret=client.send(node);
+		if (ret.getCommand().equals("yes")){
+			JOptionPane.showMessageDialog(null, "ok", "message",JOptionPane.INFORMATION_MESSAGE);
+		}else{
+			JOptionPane.showMessageDialog(null, "not", "message",JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+	
+	private void update() throws UnknownHostException, IOException {
+		Client client;
+		client=new Client(ip, port);
+		
+		Node node;
+		node=new Node();
+		
+		node.setCommand("update file lists");
+		node.setPath(path);
+		node.setPort(getFreePort());
+		node.setSavePath(savePath);
+		client.connect();
+		client.send(node);
 	}
 	
 	private void delete() throws UnknownHostException, IOException {
