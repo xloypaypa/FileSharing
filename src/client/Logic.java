@@ -178,12 +178,13 @@ public class Logic extends Thread {
 		long part=Client.getPart(node.getLength());
 		for (long i=0;i<=part;i++){
 			node.setPart(i);
-			node.setPort(getFreePort());
 			
 			while (Client.getActiveCount()==Client.getMaxThread());
 			
 			client.connect();
 			ret=client.send(node);
+			
+			node.setPort(ret.getPort());
 			
 			if (ret.getCommand().equals("ok")){
 				client.startFileClient(node);
@@ -192,7 +193,9 @@ public class Logic extends Thread {
 			}
 		}
 		
-		while (Client.getActiveCount()!=0);
+		while (Client.getActiveCount()!=0){
+//			System.out.println(Client.getActiveCount());
+		}
 		JOptionPane.showMessageDialog(null, "upload ok", "message",JOptionPane.INFORMATION_MESSAGE);
 	}
 
@@ -221,12 +224,12 @@ public class Logic extends Thread {
 			node.setPath(path);
 			node.setPart(i);
 			node.setSavePath(savePath);
-			node.setPort(getFreePort());
 			
 			while (Client.getActiveCount()==Client.getMaxThread());
 			
 			client.connect();
 			ret=client.send(node);
+			node.setPort(ret.getPort());
 			
 			if (ret.getCommand().equals("ok")){
 				client.startFileClient(node);

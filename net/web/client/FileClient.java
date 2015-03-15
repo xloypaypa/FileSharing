@@ -16,7 +16,8 @@ public class FileClient extends Thread {
 	String ip;
 	Node need;
 	Socket client;
-	static ExecutorService pool = Executors.newFixedThreadPool(2);
+	static ExecutorService pool = Executors.newFixedThreadPool(1);
+	public static long waitTime;
 	
 	public static void setMaxWriteThread(int num){
 		pool = Executors.newFixedThreadPool(num);
@@ -72,7 +73,16 @@ public class FileClient extends Thread {
 			} catch (IOException e) {
 				System.out.println("client file error: "+e.getMessage());
 				t--;
-				if (t==0) break;
+				if (t==0){
+					System.out.println("error");
+					break;
+				}
+				
+				try {
+					sleep(waitTime);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
 			}
 		}
 	}

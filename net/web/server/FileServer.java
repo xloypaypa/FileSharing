@@ -6,6 +6,8 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import web.Node;
 import web.client.Client;
@@ -15,7 +17,13 @@ import encryptionAlgorithm.AES;
 public class FileServer extends Thread {
 	Node need;
 	ServerSocket server;
+	static ExecutorService pool = Executors.newFixedThreadPool(1);
 	boolean fail=false;
+	
+	public static void setMaxWriteThread(int num){
+		pool = Executors.newFixedThreadPool(num);
+	}
+	
 	public void setNeed(Node node){
 		this.need=new Node(node);
 	}
@@ -23,10 +31,14 @@ public class FileServer extends Thread {
 	public void buildServer(){
 		try{
 			fail=false;
-			server=new ServerSocket(need.getPort());
+			server=new ServerSocket(0);
 		}catch (IOException e){
 			fail=true;
 		}
+	}
+	
+	public int getPort(){
+		return server.getLocalPort();
 	}
 	
 	@Override
@@ -60,10 +72,12 @@ public class FileServer extends Thread {
 				for (int i=0;i<file.length;i++) file[i]=ans.get(i);
 				
 				if (need.extraExist("password")){
-					file=AES.decodeAsByte(file, need.getExtraMessage("password"));
+					final byte[] ret=AES.decodeAsByte(file, need.getExtraMessage("password"));
+					writeFile(ret);
+				}else{
+					writeFile(file);
 				}
 				
-				HHD.writeByte(need.getSavePath(), file, need.getPart()*Client.fileSize, file.length);
 				in.close();
 			}
 			socket.close();
@@ -75,5 +89,14 @@ public class FileServer extends Thread {
 	
 	public boolean beFail(){
 		return this.fail;
+	}
+	
+	private void writeFile(final byte[] file) {
+		pool.execute(new Thread(){
+			@Override
+			public void run(){
+				HHD.writeByte(need.getSavePath(), file, need.getPart()*Client.fileSize, file.length);
+			}
+		});
 	}
 }

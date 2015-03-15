@@ -38,6 +38,7 @@ public class ServerSolver extends Thread {
 				node.setCommand("change port");
 			}else{
 				node.setCommand("ok");
+				node.setPort(fs.getPort());
 				pool.execute(fs);
 			}
 		}else if (node.getCommand().equals("delete")){

@@ -31,7 +31,7 @@ public class HHD {
 			if (!path.exists()){
 				path.mkdirs();
 			}
-			File dir=new File(path,Name);
+			File dir=new File(path+"/"+Name);
 			if (!dir.exists()){
 				dir.createNewFile();
 			}
