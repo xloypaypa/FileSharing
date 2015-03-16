@@ -129,7 +129,7 @@ public class Logic extends Thread {
 		
 		while (!client.isEnd()){
 			UI.showState.setStringPainted(true);
-			UI.showState.setValue(client.getStatus()+30);
+			UI.showState.setValue(client.getStatus());
 		}
 		UI.show.remove(UI.showState);
 		
