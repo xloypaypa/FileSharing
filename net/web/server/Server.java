@@ -10,11 +10,11 @@ import java.util.concurrent.Executors;
 import web.Node;
 
 public class Server {
-	public static int fileSize;
 	ServerSocket server;
 	ServerSolver solver;
 	int port;
 	static ExecutorService pool = Executors.newFixedThreadPool(10);
+	public static int bufferLength=64;
 	public Server(int port){
 		this.port=port;
 		buildServer();

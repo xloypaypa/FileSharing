@@ -5,21 +5,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 import web.Node;
 
 public class Client {
-	public static int fileSize=1000000;
 	public static int chance=5;
+	public static int bufferLength=64;
 	Socket client;
 	String ip;
 	int port;
 	FileClient fc;
-	static ExecutorService pool = Executors.newFixedThreadPool(4);
-	static int maxThread=4;
 	
 	public Client(String ip, int port){
 		this.ip=ip;
@@ -57,7 +52,7 @@ public class Client {
 		fc=new FileClient();
 		fc.ip=ip;
 		fc.need=new Node(node);
-		pool.execute(fc);
+		fc.start();
 	}
 	
 	public void runFileClient(Node node){
@@ -67,24 +62,11 @@ public class Client {
 		fc.run();
 	}
 	
-	public static void setMaxThread(int num){
-		maxThread=num;
-		pool = Executors.newFixedThreadPool(num);
+	public int getStatus(){
+		return (int) fc.getStatus();
 	}
 	
-	public static long getPart(long length){
-		long ans=0;
-		ans=length/fileSize;
-		if (length%fileSize==0) ans--;
-		if (ans==-1) ans=0;
-		return ans;
-	}
-	
-	public static int getMaxThread(){
-		return maxThread;
-	}
-	
-	public static int getActiveCount(){
-		return ((ThreadPoolExecutor)pool).getActiveCount();
+	public boolean isEnd(){
+		return !fc.isAlive();
 	}
 }

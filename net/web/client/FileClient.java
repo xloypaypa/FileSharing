@@ -1,27 +1,26 @@
 package web.client;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.RandomAccessFile;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.Socket;
-import java.util.Vector;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 
+import sun.nio.ch.FileChannelImpl;
 import web.Node;
-import database.HHD;
-import encryptionAlgorithm.AES;
 
 public class FileClient extends Thread {
 	String ip;
 	Node need;
 	Socket client;
-	static ExecutorService pool = Executors.newFixedThreadPool(1);
+	long part,length;
 	public static long waitTime;
-	
-	public static void setMaxWriteThread(int num){
-		pool = Executors.newFixedThreadPool(num);
-	}
 	
 	public void setNeed(Node node){
 		this.need=node;
@@ -34,47 +33,63 @@ public class FileClient extends Thread {
 		while (flag){
 			try {
 				client=new Socket(ip, need.getPort());
+				length=need.getTo()-need.getFrom();
 				if (!need.getCommand().equals("download")){
-					int len=(int) Math.min(Client.fileSize, need.getLength()-need.getPart()*Client.fileSize);
-					byte[] file=HHD.readByte(need.getPath(), need.getPart()*Client.fileSize, len);
+					File file=new File(need.getPath());
+					RandomAccessFile raf=new RandomAccessFile(file, "r");
+					FileChannel channel=raf.getChannel();
+					MappedByteBuffer buffer=channel.map(FileChannel.MapMode.READ_ONLY, need.getFrom(), length);
 					
-					if (need.extraExist("password")){
-						file=AES.encode(file, need.getExtraMessage("password"));
+					OutputStream os=client.getOutputStream();
+					byte[] bf=new byte[Client.bufferLength*1000000];
+					part=0;
+					while (part!=length){
+						int len;
+						if (part+Client.bufferLength*1000000<=length){
+							len=Client.bufferLength*1000000;
+						}else{
+							len=(int) (length-part);
+						}
+						part+=len;
+						buffer.get(bf,0,len);
+						os.write(bf,0,len);
 					}
-					
-					OutputStream out=client.getOutputStream();
-					out.write(file);
-					out.flush();
-					out.close();
+					releaseBuffer(buffer);
+					channel.close();
+					raf.close();
+					os.close();
 				}else{
-					InputStream in=client.getInputStream();
-					byte[] now=new byte[64];
-					Vector <Byte> ans=new Vector<Byte>();
+					File file=new File(need.getSavePath());
+					
+					PrintWriter fos = new PrintWriter(file);
+					fos.write("");
+					fos.close();
+					
+					RandomAccessFile raf=new RandomAccessFile(file, "rw");
+					FileChannel channel=raf.getChannel();
+					MappedByteBuffer buffer=channel.map(FileChannel.MapMode.READ_WRITE, need.getFrom(), length);
+					
+					InputStream is=client.getInputStream();
+					byte[] bf=new byte[Client.bufferLength*1000000];
+					int len;
 					while (true){
-						int len=in.read(now);
+						len=is.read(bf);
 						if (len==-1) break;
-						for (int i=0;i<len;i++) ans.add(now[i]);
+						part+=len;
+						buffer.put(bf);
 					}
-					
-					final byte[] file=new byte[ans.size()];
-					for (int i=0;i<file.length;i++) file[i]=ans.get(i);
-					
-					if (need.extraExist("password")){
-						final byte[] ret=AES.decodeAsByte(file, need.getExtraMessage("password"));
-						writeFile(ret);
-					}else{
-						writeFile(file);
-					}
-					
-					in.close();
+					releaseBuffer(buffer);
+					channel.close();
+					raf.close();
+					is.close();
 				}
 				client.close();
 				flag=false;
 			} catch (IOException e) {
-				System.out.println("client file error: "+e.getMessage());
+				System.out.println(need.getPath()+" error: "+e.getMessage());
 				t--;
 				if (t==0){
-					System.out.println("error");
+					System.out.println(need.getPath()+" fail");
 					break;
 				}
 				
@@ -86,13 +101,19 @@ public class FileClient extends Thread {
 			}
 		}
 	}
-
-	private void writeFile(final byte[] file) {
-		pool.execute(new Thread(){
-			@Override
-			public void run(){
-				HHD.writeByte(need.getSavePath(), file, need.getPart()*Client.fileSize, file.length);
-			}
-		});
+	
+	public long getStatus(){
+		if (length==0) return 100;
+		return part*100/length;
+	}
+	
+	private static void releaseBuffer(MappedByteBuffer buffer) {
+		try {
+			Method m = FileChannelImpl.class.getDeclaredMethod("unmap", MappedByteBuffer.class);
+			m.setAccessible(true);
+			m.invoke(FileChannelImpl.class, buffer);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e1) {
+			e1.printStackTrace();
+		}
 	}
 }

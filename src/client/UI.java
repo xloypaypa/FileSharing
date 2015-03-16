@@ -10,21 +10,24 @@ import interfaceTool.LineButtons;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 
 public class UI {
 	JFrame window;
-	JPanel show;
+	public static JPanel show;
 	LineButtons lbs;
 	Input ip,port,path,savePath;
 	
+	public static JProgressBar showState;
+	
 	public UI(){
 		window=new JFrame("Client");
-		window.setBounds(200, 100, 250, 680);
+		window.setBounds(200, 100, 550, 500);
 		window.setLayout(null);
 		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
 		show=new JPanel();
-		show.setBounds(0, 0, 250, 680);
+		show.setBounds(0, 0, 550, 680);
 		show.setLayout(null);
 		
 		addItem();
@@ -76,8 +79,11 @@ public class UI {
 					return ;
 				}
 				
-				Logic logic=new Logic();
+				final Logic logic=new Logic();
 				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "download");
+				showState=new JProgressBar();
+				showState.setBounds(250, 10, 250, 20);
+				show.add(showState);
 				logic.start();
 			}
 		});
@@ -101,52 +107,9 @@ public class UI {
 				
 				Logic logic=new Logic();
 				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "upload");
-				logic.start();
-			}
-		});
-		
-		lbs.addBreak();
-		
-		lbs.addButton("open", 40, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkIP(ip.getWord())){
-					JOptionPane.showMessageDialog(window, "please input ip right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				int pt;
-				try{
-					pt=Integer.valueOf(port.getWord());
-				}catch (NumberFormatException e){
-					JOptionPane.showMessageDialog(window, "please input port right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				
-				Logic logic=new Logic();
-				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "open");
-				logic.start();
-			}
-		});
-		
-		lbs.addBreak();
-		
-		lbs.addButton("delete", 40, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkIP(ip.getWord())){
-					JOptionPane.showMessageDialog(window, "please input ip right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				int pt;
-				try{
-					pt=Integer.valueOf(port.getWord());
-				}catch (NumberFormatException e){
-					JOptionPane.showMessageDialog(window, "please input port right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				
-				Logic logic=new Logic();
-				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "delete");
+				showState=new JProgressBar();
+				showState.setBounds(250, 10, 250, 20);
+				show.add(showState);
 				logic.start();
 			}
 		});
@@ -170,52 +133,6 @@ public class UI {
 				
 				Logic logic=new Logic();
 				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "shut down");
-				logic.start();
-			}
-		});
-		
-		lbs.addBreak();
-		
-		lbs.addButton("update file", 40, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkIP(ip.getWord())){
-					JOptionPane.showMessageDialog(window, "please input ip right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				int pt;
-				try{
-					pt=Integer.valueOf(port.getWord());
-				}catch (NumberFormatException e){
-					JOptionPane.showMessageDialog(window, "please input port right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				
-				Logic logic=new Logic();
-				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "update file lists");
-				logic.start();
-			}
-		});
-		
-		lbs.addBreak();
-		
-		lbs.addButton("update end", 40, new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent arg0) {
-				if (!checkIP(ip.getWord())){
-					JOptionPane.showMessageDialog(window, "please input ip right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				int pt;
-				try{
-					pt=Integer.valueOf(port.getWord());
-				}catch (NumberFormatException e){
-					JOptionPane.showMessageDialog(window, "please input port right", "error",JOptionPane.ERROR_MESSAGE);
-					return ;
-				}
-				
-				Logic logic=new Logic();
-				logic.setMessage(ip.getWord(), pt, path.getWord(), savePath.getWord(), "update end");
 				logic.start();
 			}
 		});

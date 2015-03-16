@@ -8,7 +8,7 @@ public class Node extends Type {
 	private String command;
 	
 	private String path,savePath;
-	private long length,part;
+	private long length,from,to;
 	
 	public Node(){
 		port=0;
@@ -16,7 +16,8 @@ public class Node extends Type {
 		path=new String();
 		savePath=new String();
 		length=0;
-		part=0;
+		from=0;
+		to=0;
 	}
 	public Node(Node other){
 		this.port=other.port;
@@ -24,7 +25,8 @@ public class Node extends Type {
 		this.path=new String(other.path);
 		this.savePath=new String(other.savePath);
 		this.length=other.length;
-		this.part=other.part;
+		this.from=other.from;
+		this.to=other.to;
 	}
 	
 	public void setPort(int port){
@@ -42,8 +44,11 @@ public class Node extends Type {
 	public void setLength(long length){
 		this.length=length;
 	}
-	public void setPart(long part){
-		this.part=part;
+	public void setFrom(long from){
+		this.from=from;
+	}
+	public void setTo(long to){
+		this.to=to;
 	}
 	
 	public int getPort(){
@@ -61,8 +66,11 @@ public class Node extends Type {
 	public long getLength(){
 		return this.length;
 	}
-	public long getPart(){
-		return this.part;
+	public long getFrom(){
+		return this.from;
+	}
+	public long getTo(){
+		return this.to;
 	}
 	
 	public String format(){
@@ -71,7 +79,8 @@ public class Node extends Type {
 		ans+="[path]\n"+path+"\n";
 		ans+="[savePath]\n"+savePath+"\n";
 		ans+="[length]\n"+length+"\n";
-		ans+="[part]\n"+part+"\n";
+		ans+="[from]\n"+from+"\n";
+		ans+="[to]\n"+to+"\n";
 		ans+="[command]\n"+command+"\n";
 		ans+=super.format();
 		return ans;
@@ -105,8 +114,10 @@ public class Node extends Type {
 				savePath=new String(message.get(i+1));
 			}else if (message.get(i).equals("[length]")){
 				length=Long.valueOf(message.get(i+1));
-			}else if (message.get(i).equals("[part]")){
-				part=Long.valueOf(message.get(i+1));
+			}else if (message.get(i).equals("[from]")){
+				from=Long.valueOf(message.get(i+1));
+			}else if (message.get(i).equals("[to]")){
+				to=Long.valueOf(message.get(i+1));
 			}else if (message.get(i).equals("[command]")){
 				command=new String(message.get(i+1));
 			}

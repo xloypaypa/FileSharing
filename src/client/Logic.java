@@ -1,12 +1,11 @@
 package client;
 
+import java.io.File;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
 
-import database.HHD;
 import web.Node;
 import web.client.Client;
 
@@ -15,7 +14,7 @@ public class Logic extends Thread {
 	int port;
 	String path,savePath;
 	String command;
-	
+
 	void setMessage(String ip,int port, String path,String savePath,String command){
 		this.ip=new String(ip);
 		this.port=port;
@@ -39,13 +38,6 @@ public class Logic extends Thread {
 				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
 				return ;
 			}
-		}else if (command.equals("open")){
-			try{
-				open();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
-				return ;
-			}
 		}else if (command.equals("shut down")){
 			try{
 				shutDown();
@@ -53,78 +45,7 @@ public class Logic extends Thread {
 				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
 				return ;
 			}
-		}else if (command.equals("delete")){
-			try{
-				delete();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
-				return ;
-			}
-		}else if (command.equals("update file lists")){
-			try{
-				update();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
-				return ;
-			}
-		}else if (command.equals("update end")){
-			try{
-				updateOK();
-			} catch (IOException e) {
-				JOptionPane.showMessageDialog(null, "net error", "error",JOptionPane.ERROR_MESSAGE);
-				return ;
-			}
 		}
-	}
-	
-	private void updateOK() throws UnknownHostException, IOException {
-		Client client;
-		client=new Client(ip, port);
-		
-		Node node,ret;
-		node=new Node();
-		
-		node.setCommand("update end");
-		node.setPath(path);
-		node.setPort(getFreePort());
-		node.setSavePath(savePath);
-		client.connect();
-		ret=client.send(node);
-		if (ret.getCommand().equals("yes")){
-			JOptionPane.showMessageDialog(null, "ok", "message",JOptionPane.INFORMATION_MESSAGE);
-		}else{
-			JOptionPane.showMessageDialog(null, "not", "message",JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
-	
-	private void update() throws UnknownHostException, IOException {
-		Client client;
-		client=new Client(ip, port);
-		
-		Node node;
-		node=new Node();
-		
-		node.setCommand("update file lists");
-		node.setPath(path);
-		node.setPort(getFreePort());
-		node.setSavePath(savePath);
-		client.connect();
-		client.send(node);
-	}
-	
-	private void delete() throws UnknownHostException, IOException {
-		Client client;
-		client=new Client(ip, port);
-		
-		Node node;
-		node=new Node();
-		
-		node.setCommand("delete");
-		node.setPath(path);
-		node.setPort(getFreePort());
-		node.setSavePath(savePath);
-		client.connect();
-		client.send(node);
 	}
 	
 	private void shutDown() throws UnknownHostException, IOException {
@@ -136,22 +57,7 @@ public class Logic extends Thread {
 		
 		node.setCommand("shutDown");
 		node.setPath(path);
-		node.setPort(getFreePort());
-		node.setSavePath(savePath);
-		client.connect();
-		client.send(node);
-	}
-
-	private void open() throws UnknownHostException, IOException {
-		Client client;
-		client=new Client(ip, port);
-		
-		Node node;
-		node=new Node();
-		
-		node.setCommand("open");
-		node.setPath(path);
-		node.setPort(getFreePort());
+		node.setPort(0);
 		node.setSavePath(savePath);
 		client.connect();
 		client.send(node);
@@ -164,95 +70,69 @@ public class Logic extends Thread {
 		Node node,ret;
 		node=new Node(); ret=new Node();
 		
-		node.setCommand("clean file");
-		node.setPath(savePath);
-		
 		client.connect();
-		client.send(node);
+		ret=client.send(node);
+		
+		File file=new File(path);
 		
 		node.setCommand("upload");
-		node.setLength(HHD.getFileLength(path));
+		node.setFrom(0);
+		node.setTo(file.length());
+		node.setLength(file.length());
 		node.setPath(path);
 		node.setSavePath(savePath);
+		node.setPort(0);
 		
-		long part=Client.getPart(node.getLength());
-		for (long i=0;i<=part;i++){
-			node.setPart(i);
-			
-			while (Client.getActiveCount()==Client.getMaxThread());
-			
-			client.connect();
-			ret=client.send(node);
-			
-			node.setPort(ret.getPort());
-			
-			if (ret.getCommand().equals("ok")){
-				client.startFileClient(node);
-			}else{
-				i--;
-			}
-		}
+		client.connect();
+		ret=client.send(node);
 		
-		while (Client.getActiveCount()!=0){
-//			System.out.println(Client.getActiveCount());
+		node.setPort(ret.getPort());
+		client.startFileClient(node);
+		
+		while (!client.isEnd()){
+			UI.showState.setStringPainted(true);
+			UI.showState.setValue(client.getStatus());
 		}
+		UI.show.remove(UI.showState);
+		
 		JOptionPane.showMessageDialog(null, "upload ok", "message",JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	private void download() throws UnknownHostException, IOException {
 		Client client;
 		client=new Client(ip, port);
+		
 		Node node,ret;
 		node=new Node(); ret=new Node();
+		
 		node.setCommand("get file length");
-		node.setPath(path);
+		node.setFrom(0);
+		node.setTo(0);
+		node.setPort(0);
+		node.setLength(0);
 		node.setSavePath(savePath);
-		node.setPort(getFreePort());
+		node.setPath(path);
 		
 		client.connect();
 		ret=client.send(node);
 		
-		HHD.cleanFile(node.getSavePath());
+		node.setCommand("download");
+		node.setFrom(0);
+		node.setTo(ret.getLength());
+		node.setLength(ret.getLength());
 		
-		long part=Client.getPart(ret.getLength());
-		System.out.println("part: "+part);
-		System.out.println(part);
-		for (long i=0;i<=part;i++){
-			
-			node.setCommand("download");
-			node.setLength(ret.getLength());
-			node.setPath(path);
-			node.setPart(i);
-			node.setSavePath(savePath);
-			
-			while (Client.getActiveCount()==Client.getMaxThread());
-			
-			client.connect();
-			ret=client.send(node);
-			node.setPort(ret.getPort());
-			
-			if (ret.getCommand().equals("ok")){
-				client.startFileClient(node);
-			}else{
-				i--;
-			}
+		client.connect();
+		ret=client.send(node);
+		
+		node.setPort(ret.getPort());
+		client.startFileClient(node);
+		
+		while (!client.isEnd()){
+			UI.showState.setStringPainted(true);
+			UI.showState.setValue(client.getStatus()+30);
 		}
+		UI.show.remove(UI.showState);
 		
-		while (Client.getActiveCount()!=0);
 		JOptionPane.showMessageDialog(null, "download ok", "message",JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	private int getFreePort(){
-		int ans;
-		ServerSocket ss;
-		try {
-			ss = new ServerSocket(0);
-			ans=ss.getLocalPort();
-			ss.close();
-		} catch (IOException e) {
-			ans=8989;
-		}
-		
-		return ans;
 	}
 }
