@@ -1,11 +1,11 @@
-package web.server;
+package server;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import web.Node;
+import type.Node;
 
 public class ServerSolver extends Thread {
 	Node node;

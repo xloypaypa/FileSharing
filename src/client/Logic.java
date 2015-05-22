@@ -6,8 +6,7 @@ import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
 
-import web.Node;
-import web.client.Client;
+import type.Node;
 
 public class Logic extends Thread {
 	String ip;

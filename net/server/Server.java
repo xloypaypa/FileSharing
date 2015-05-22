@@ -1,4 +1,4 @@
-package web.server;
+package server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import web.Node;
+import type.Node;
 
 public class Server {
 	ServerSocket server;

@@ -1,4 +1,4 @@
-package web;
+package type;
 
 import java.util.Vector;
 
