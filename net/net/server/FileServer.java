@@ -1,11 +1,11 @@
-package server;
+package net.server;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import tool.FileTP;
-import type.Node;
+import net.tool.FileTP;
+import net.type.Node;
 
 public class FileServer extends Thread {
 	Node need;

@@ -3,6 +3,8 @@ package server;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
+import net.server.Server;
+
 public class Main {
 	public static void main(String[] args){
 		Server server;

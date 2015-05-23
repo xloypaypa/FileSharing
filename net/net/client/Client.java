@@ -1,4 +1,4 @@
-package client;
+package net.client;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,7 +6,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
-import type.Node;
+import net.type.Node;
 
 public class Client {
 	public static int chance=5;

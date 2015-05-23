@@ -1,4 +1,4 @@
-package type;
+package net.type;
 
 import java.util.Vector;
 

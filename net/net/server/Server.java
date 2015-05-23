@@ -1,4 +1,4 @@
-package server;
+package net.server;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import type.Node;
+import net.type.Node;
 
 public class Server {
 	ServerSocket server;

@@ -6,7 +6,8 @@ import java.net.UnknownHostException;
 
 import javax.swing.JOptionPane;
 
-import type.Node;
+import net.client.Client;
+import net.type.Node;
 
 public class Logic extends Thread {
 	String ip;
@@ -68,9 +69,6 @@ public class Logic extends Thread {
 		
 		Node node,ret;
 		node=new Node(); ret=new Node();
-		
-		client.connect();
-		ret=client.send(node);
 		
 		File file=new File(path);
 		
